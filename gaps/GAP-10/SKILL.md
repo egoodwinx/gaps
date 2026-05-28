@@ -82,10 +82,6 @@ business name such as "The Great British Bakery". Avoid using "foo", "bar",
 Generate a __description__ field which summarizes the output, and has enough
 context such that it could be used to regenerate a similarly shaped payload.
 
-The values generated for leaf nodes do not matter and do not need to be
-preserved or included in the description - unless otherwise specified by the
-user.
-
 ### Errors
 
 When the mock should represent an error state, use the GraphQL errors format -
@@ -96,11 +92,14 @@ check against the schema.
 
 ```json
 {
-  "data": { "fieldName": null },
-  "errors": [{
-    "path": ["fieldName"],
-    "message": "field error"
-  }]
+  "field-error": {
+    "data": { "fieldName": null },
+    "errors": [{
+      "path": ["fieldName"],
+      "message": "field error"
+    }],
+    "__path__": "fieldName"
+  }
 }
 ```
 
@@ -110,7 +109,8 @@ When asked to add or update a mock variant:
 
 1. Locate the operation or fragment's mock file
 2. Read the existing mock file to understand the mock value shape
-3. If creating a new mock, create a new entry with a descriptive mock variant id
+3. If creating a new mock, create a new entry with a descriptive mock variant ID
+   (must NOT start with two underscores `__`)
 4. Ensure the mock value includes appropriate `data` and/or `errors` fields
 5. Add a summary of the user's prompt to the `__description__` field
 6. Write the updated mock file (do not modify other mocks in the file)
@@ -118,5 +118,5 @@ When asked to add or update a mock variant:
 ## Schema
 
 Look for the GraphQL schema in the repository to understand what shape of data
-should be returned. (e.g. <repo_root>/schema.graphql). Ask the user if the
-schema file cannot be found, and remember where it is located for future.
+should be returned. (e.g., `<repo_root>/schema.graphqls`). Ask the user if the
+schema file cannot be found, and remember where it is located.

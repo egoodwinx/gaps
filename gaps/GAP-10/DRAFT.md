@@ -4,9 +4,9 @@ This document specifies the `@mock` directive, which allows GraphQL clients to
 return mocked data for individual fields, selection sets, or entire operations.
 
 Mock data may be defined for fields and types that do not yet exist in the
-schema. This enables backend and client developers to work in parallel — client
-developers can start building applications using expected new fields without
-waiting for the server to implement the new schema.
+deployed schema. This enables backend and client developers to work in parallel
+— client developers can start building applications using expected new fields
+without waiting for the server to implement the new schema.
 
 ```graphql example
 query GetBusinessInfo {
@@ -130,6 +130,13 @@ that {SelectionSet} must be removed:
 - If the parent is a fragment definition, remove the definition and all of its
   corresponding fragment spreads.
 
+Removal must be applied recursively up the tree: if pruning a field or fragment
+leaves its parent with an empty selection set, that parent must also be removed.
+
+If recursive removal would eliminate the operation's entire root selection set,
+this is a validation error. In this case, `@mock` should be applied to the
+operation itself rather than to its individual fields.
+
 After removing mocked selections, if an operation
 [variable](https://spec.graphql.org/September2025/#sec-Language.Variables) is no
 longer referenced by any remaining selection, the variable definition must also
@@ -169,7 +176,9 @@ query GetFoo($id: ID!, $planet: String!) {
     ...FooFields
     ...MoreFooFields
     ... on Foo { baz @mock(value: "baz!") }
-    sayHello(planet: $planet) @mock(value: "hello world")
+    greetings {
+      sayHello(planet: $planet) @mock(value: "hello world")
+    }
   }
 }
 ```
@@ -215,7 +224,7 @@ TransformOperation(document, selectionSet) :
 
 When `@mock` is applied to a selection which is a child of a list type, the
 client inserts the same _mock value_ in each corresponding array element in
-the repsonse.
+the response.
 
 For example, this query inserts the same {"blurHash"} value for each item in
 {"menuItems"}:
@@ -373,7 +382,7 @@ is or may be applied for a given *mock variant id*.
 
 :: A *field path* is a dot-separated string of field names (or aliases, where
 present) representing the location of the field relative to the root of the
-operation or fragment. 
+operation or fragment.
 
 For `@mock` on an operation root, {"__path__"} is the root operation type name
 (e.g. {"Query"}, {"Mutation"}, or {"Subscription"}).
@@ -431,8 +440,8 @@ This would be a (minimally) valid corresponding *mock file*:
 
 #### __metadata__
 
-{"__metadata__"} may be a key-value mapping for additional user or application
-defined metadata.
+{"__metadata__"} may be a key-value mapping for additional user or
+application-defined metadata.
 
 # Validation
 
@@ -463,12 +472,12 @@ field, the *mock value* must satisfy {CompleteValue()} for the field's
 schema type. Fields present in the operation but not defined in the
 schema are skipped during validation.
 
-Note: It is also possible to detect if a JSON payload is valid for a given
+Note: It is possible to detect if a JSON payload is valid for a given
 operation by constructing an in-memory GraphQL server that has no resolvers and
 uses the JSON payload as its {rootValue} — then ensuring no errors are
 thrown for execution of the operation against the test server. The schema
 must be modified to include any new types and fields referenced in the
-*mock value*.
+*mock value* to use this method.
 
 ## Inline Mock Value Validation
 
@@ -530,7 +539,7 @@ ValidateNoNestedMocks(selectionSet, isMockedByParent) :
     * Let {fieldUsesMock} be {true} if {selection} has a `@mock` directive,
       otherwise {false}.
     * If {isMockedByParent} is {true}, {fieldUsesMock} must be {false}.
-    * Let {isChildrenMocked} be {true} if both {isMockedByParent} and
+    * Let {isChildrenMocked} be {true} if {isMockedByParent} or
       {fieldUsesMock} is {true}, otherwise {false}.
     * If {selection} has a {selectionSet}:
       * Let {nextSelectionSet} be that {selectionSet}.
@@ -542,6 +551,10 @@ An operation's root {SelectionSet} must contain at least one selection
 that does not use `@mock`. If every selection in the operation's root
 {SelectionSet} is mocked, the transformed operation would contain an
 empty {SelectionSet}, which is not valid GraphQL.
+
+Note: This rule does not apply when `@mock` is applied to the operation
+definition itself — in that case, no request is sent to the server and the
+entire response is resolved from the *mock file*.
 
 ```graphql counter-example
 # ❌ Validation error: all top-level fields are mocked

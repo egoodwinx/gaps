@@ -153,7 +153,7 @@ However, there are issues with this API:
 
 ##### 1. Parent Ambiguity
 
-Which list parent does `nth-child` apply to? There are two list parents of
+Which list parent does `nth_child` apply to? There are two list parents of
 `Photo.blurHash`: (1) `Query.businessesNearMe` and (2) `Business.menuItems`.
 
 We would need an even more complicated API to resolve this ambiguity.
@@ -177,14 +177,14 @@ The data the server returns may change over time, either due to:
 
 1. Organic results change
 2. The server changes behavior (e.g. a default `orderBy` parameter changes from
-   `ASC to `DESC` -- this should not happen by convention, but we cannot rely on
+   `ASC` to `DESC` - this should not happen by convention, but we cannot rely on
    this.)
 
 This means that the result object that the mocked field is merged into may
 change over time - resulting in a different UI state than was intended,
 potentially leading to nonsensical or broken UI states.
 
-##### 3. Abstract types 
+##### 3. Abstract types
 
 ```graphql
 query BooksInStock {
@@ -201,7 +201,7 @@ query BooksInStock {
 ```
 
 It is ambiguous if the `nth_child` applies to the concrete or abstract type.
-i.e. does `nth_child: 3` means "the third occurrence of PhysicalStore
+i.e., does `nth_child: 3` means "the third occurrence of PhysicalStore
 specifically" or "the third element of `findBookInStock`"?
 
 This is particularly problematic where applied inside a fragment defined in a
@@ -213,7 +213,7 @@ as a list? 🤯
 
 ##### Summary
 
-Although complex, the issues above are solvable in theory. However given the
+Although complex, the issues above are solvable in theory. However, given the
 complexity, the current version of this specification does not support this.
 
 If you have ideas for how to solve this, please send a pull request for a future
@@ -221,7 +221,7 @@ spec version :)
 
 </details>
 
-### Mocking on inline fragments and fragment spreads
+### Why @mock isn't supported on inline fragments or fragment spreads
 
 `@mock` is not supported on inline fragments or fragment spreads:
 
