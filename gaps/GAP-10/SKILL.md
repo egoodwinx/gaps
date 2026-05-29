@@ -26,7 +26,7 @@ A "mock variant" is an object containing the following attributes:
 - **`data`** (required): The mock value - the raw data to be returned - defined by https://spec.graphql.org/September2025/#sec-Data.
 - **`errors`**: May contain an errors array - defined by https://spec.graphql.org/September2025/#sec-Errors.
 - **`extensions`**: May contain arbitrary data - defined by https://spec.graphql.org/September2025/#sec-Extensions.
-- **`__path__`** (required): The field path within the operation or fragment where `@mock` is applied. A dot-separated string of field names (or aliases, where present) relative to the root. For `@mock` on an operation root, use the root operation type name (e.g. `"Query"`, `"Mutation"`, `"Subscription"`). When a field has an alias, use the alias in the path.
+- **`__path__`** (required): The field path within the operation or fragment where `@mock` is applied. A dot-separated string of field names (or aliases, where present) relative to the root. For `@mock` on an operation root, use the root operation type name (e.g., `"Query"`, `"Mutation"`, `"Subscription"`). When a field has an alias, use the alias in the path.
 - **`__description__`**: A natural language description of the data being returned.
 - **`__metadata__`**: May contain a key/value mapping of arbitrary data.
 
@@ -61,7 +61,7 @@ A "mock variant" is an object containing the following attributes:
 
 When generating a new mock value, add the following to your context window:
 
-- the user's prompt (e.g. "add a @mock response for this field <highlighted position>")
+- the user's prompt (e.g., "add a @mock response for this field <highlighted position>")
 - the corresponding selection and nested selection set in the operation or fragment
 - the GraphQL schema. It is possible that some of the fields in the mock
   response already exist in the schema, and may be looked up - you can use the
@@ -75,7 +75,7 @@ otherwise).
 Ensure the generated mock value is valid against the selections in the operation
 or fragment.
 
-Use plausible and realistic values. e.g. for "Business.name", use a made-up
+Use plausible and realistic values, e.g., for "Business.name", use a made-up
 business name such as "The Great British Bakery". Avoid using "foo", "bar",
 "myBusiness", "string" etc. as values.
 

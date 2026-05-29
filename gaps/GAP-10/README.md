@@ -65,15 +65,15 @@ query PetStorePets {
 <details>
 <summary>Details</summary>
 
-A hypothetical `nth_child` argument (e.g. `@mock(value: "...", nth_child: 0)`)
+A hypothetical `nth_child` argument (e.g., `@mock(value: "...", nth_child: 0)`)
 would let clients target specific array positions. However, this introduces
 several problems:
 
 1. **Parent Ambiguity** — A mocked field may be nested under multiple list
-   parents (e.g. `businessesNearMe[].menuItems[].blurHash`). It's unclear
+   parents (e.g., `businessesNearMe[].menuItems[].blurHash`). It's unclear
    which list `nth_child` indexes into.
 
-2. **Order Instability** — Server results may change order over time (e.g. a
+2. **Order Instability** — Server results may change order over time (e.g., a
    default sort changes), causing mock data to be merged into the wrong object
    and producing broken UI states.
 

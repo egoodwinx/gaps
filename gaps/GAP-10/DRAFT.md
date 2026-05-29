@@ -151,7 +151,7 @@ particular, `@mock` takes precedence over `@skip` and `@include` — the mock da
 is always returned, irrespective of whether the field would otherwise be skipped
 or included based on those directives' conditions.
 
-If `@mock` is applied to an operation definition (e.g. {"query"}), the entire
+If `@mock` is applied to an operation definition (e.g., {"query"}), the entire
 response must be resolved from a _mock file_. No request should be sent to the
 server.
 
@@ -386,7 +386,7 @@ present) representing the location of the field relative to the root of the
 operation or fragment.
 
 For `@mock` on an operation root, {"__path__"} is the root operation type name
-(e.g. {"Query"}, {"Mutation"}, or {"Subscription"}).
+(e.g., {"Query"}, {"Mutation"}, or {"Subscription"}).
 
 **Example**
 
