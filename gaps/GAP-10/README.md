@@ -9,9 +9,10 @@ JSON files alongside the operations that use them.
 ## Motivation
 
 Client and backend developers often work in parallel, but clients cannot build
-against schema that isn't yet implemented. The `@mock` directive lets client
-developers define and use mock responses for fields and types that may not yet
-be present in the server schema, unblocking frontend development.
+against schema that isn't yet deployed. The `@mock` directive lets client
+developers define and use mock responses for fields and types that are defined
+locally but not yet present in the server schema, unblocking frontend
+development.
 
 ## FAQs
 
@@ -59,33 +60,6 @@ query PetStorePets {
 }
 ```
 
-#### Future Proposal
-
-We may in future extend this specification to allow for a random pick of
-multiple mock values:
-
-```graphql
-query PetStorePets {
-  dogsForSale {
-    name @mock(value: "john") @mock(value: "ringo") @mock(value: "paul")
-  }
-}
-```
-
-This may produce the following response:
-
-```json
-{
-  "data": {
-    "dogsForSale": [
-      { "name": "paul" },
-      { "name": "ringo" },
-      { "name": "paul" }
-    ]
-  }
-}
-```
-
 #### Why don't we allow specifying an array position?
 
 <details>
@@ -103,8 +77,8 @@ query GetUserFavorites {
 }
 ```
 
-Consider that we wish to mock a new field that does not yet exist on the server;
-`blurHash`:
+Consider that we wish to mock a new field that is defined locally but not yet
+deployed on the server; `blurHash`:
 
 ```graphql
 query GetUserFavorites {
@@ -261,37 +235,6 @@ query Foo {
 
 <details>
 <summary>Why not?</summary>
-
-#### New types are unreachable
-
-The primary motivation for `@mock` is building against schema that doesn't yet
-exist. But when a type condition references a new type, the server will never
-return that type in its response — so the mock data has nowhere to be merged.
-
-```graphql
-query PetStore {
-  forSale {
-    ... on Dog {
-      breed
-    }
-    # Fish doesn't exist in the schema yet.
-    # The server will never return __typename: "Fish",
-    # so this mock data can never be inserted.
-    ... on Fish @mock(variant: "clownfish") {
-      species
-    }
-  }
-}
-```
-
-For the non-list case, the client could force-overlay the mock data, but this
-means overriding the server's type resolution — semantically different from what
-`@mock` does elsewhere, where it merges data into a known position in the
-response tree.
-
-For the list case, the client would need to *inject* new objects into the array,
-raising the same position-ambiguity problems described in
-[Why don't we allow specifying an array position?](#why-dont-we-allow-specifying-an-array-position).
 
 #### `__typename` dependency
 

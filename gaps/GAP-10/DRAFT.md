@@ -12,7 +12,7 @@ without waiting for the server to implement the new schema.
 query GetBusinessInfo {
   business(id: "123") {
     name
-    # this field doesn't exist yet on the server!
+    # this field is defined locally but not yet deployed on the server!
     website @mock(value: "https://www.example.com")
   }
 }
@@ -253,7 +253,7 @@ require a *mock file*.
 Note: Mock files are intended to be long-lived and may be checked into version
 control. This is useful for client developers working on a project over an
 extended period of time, and where the client code depends on GraphQL schema
-that does not yet exist.
+that is defined locally but not yet deployed on the server.
 
 ## Mock File Location
 
@@ -452,6 +452,10 @@ may become invalid over time.
 
 Conforming clients must verify that mock data is valid for each operation.
 
+Note: When validation occurs is implementation-defined. Common strategies
+include validating at code generation time, as part of a test suite, or
+on-demand when an operation is modified.
+
 ## Mock File Validation
 
 If a *mock variant id* referenced by a {"variant"} argument does not exist in
@@ -468,9 +472,9 @@ a *mock file*.
 
 A *mock value* is valid when its shape is compatible with the operation's
 selections at the *field path* where `@mock` is applied. For each selected
-field, the *mock value* must satisfy {CompleteValue()} for the field's
-schema type. Fields present in the operation but not defined in the
-schema are skipped during validation.
+field, the *mock value* must satisfy {CompleteValue()} for the field's type
+as defined in the client's local schema. The local schema may include types
+and fields not yet deployed on the server.
 
 Note: It is possible to detect if a JSON payload is valid for a given
 operation by constructing an in-memory GraphQL server that has no resolvers and
