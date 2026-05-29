@@ -344,7 +344,8 @@ list value directly:
 [GraphQL error format](https://spec.graphql.org/September2025/#sec-Errors).
 This is valid for both operation-level and field-level `@mock` directives.
 
-The client must merge {"errors"} into the GraphQL server's response if present.
+The client must append the contents of {"errors"} to the response's {"errors"}
+array.
 
 #### extensions
 
