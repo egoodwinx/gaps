@@ -121,15 +121,20 @@ function validateAllowedFiles(dirPath, gapName) {
     if (statSync(fullPath).isDirectory()) {
       error(
         gapName,
-        `Unexpected directory "${entry}" found. GAP directories may only contain *.md files and metadata.yml. If you believe this is in error, please ping @graphql/gaps-editors.`,
+        `Unexpected directory "${entry}" found. GAP directories may only contain *.md files, metadata.yml, and metadata.json. If you believe this is in error, please ping @graphql/gaps-editors.`,
       );
     }
-    if (entry === "metadata.yml" || entry.endsWith(".md")) {
+    if (
+      entry === "metadata.yml" ||
+      entry === "metadata.json" ||
+      entry.endsWith(".md") ||
+      entry.startsWith(".")
+    ) {
       continue;
     }
     error(
       gapName,
-      `Unexpected file "${entry}" found. GAP directories may only contain *.md files and metadata.yml. If you believe this is in error, please ping @graphql/gaps-editors.`,
+      `Unexpected file "${entry}" found. GAP directories may only contain *.md files, metadata.yml, and metadata.json. If you believe this is in error, please ping @graphql/gaps-editors.`,
     );
   }
 }
