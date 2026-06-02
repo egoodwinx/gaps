@@ -115,32 +115,46 @@ function validateMetadata(dirPath, gapName) {
 }
 
 function validateAllowedFiles(dirPath, gapName) {
-  const entries = readdirSync(dirPath);
-  for (const entry of entries) {
+  for (const entry of readdirSync(dirPath)) {
     if (entry.startsWith(".")) {
-      error(
-        gapName,
-        `Dotfiles are not allowed: "${entry}". If you believe this is in error, please ping @graphql/gaps-editors.`,
-      );
-    }
-    const fullPath = join(dirPath, entry);
-    if (statSync(fullPath).isDirectory()) {
-      error(
-        gapName,
-        `Unexpected directory "${entry}" found. GAP directories may only contain *.md files, metadata.yml, and metadata.json. If you believe this is in error, please ping @graphql/gaps-editors.`,
-      );
-    }
-    if (
-      entry === "metadata.yml" ||
-      entry === "metadata.json" ||
-      entry.endsWith(".md")
-    ) {
+      error(gapName, `Dotfiles are not allowed: "${entry}".`);
       continue;
     }
-    error(
-      gapName,
-      `Unexpected file "${entry}" found. GAP directories may only contain *.md files, metadata.yml, and metadata.json. If you believe this is in error, please ping @graphql/gaps-editors.`,
-    );
+
+    const fullPath = join(dirPath, entry);
+
+    if (statSync(fullPath).isDirectory()) {
+      if (entry === "versions") {
+        validateVersionsDir(fullPath, gapName);
+      } else {
+        error(gapName, `Unexpected directory "${entry}".`);
+      }
+      continue;
+    }
+
+    if (entry === "metadata.yml" || entry === "metadata.json" || entry.endsWith(".md")) {
+      continue;
+    }
+
+    error(gapName, `Unexpected file "${entry}".`);
+  }
+}
+
+function validateVersionsDir(dirPath, gapName) {
+  for (const entry of readdirSync(dirPath)) {
+    if (entry.startsWith(".")) {
+      error(gapName, `Dotfiles are not allowed in versions/: "${entry}".`);
+      continue;
+    }
+
+    if (statSync(join(dirPath, entry)).isDirectory()) {
+      error(gapName, `Unexpected directory in versions/: "${entry}".`);
+      continue;
+    }
+
+    if (!/^\d{4}-\d{2}\.(md|yml)$/.test(entry)) {
+      error(gapName, `Unexpected file in versions/: "${entry}". Only YYYY-MM.md and YYYY-MM.yml are allowed.`);
+    }
   }
 }
 
