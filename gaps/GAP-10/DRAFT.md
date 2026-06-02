@@ -550,6 +550,40 @@ ValidateNoNestedMocks(selectionSet, isMockedByParent) :
       * Let {nextSelectionSet} be that {selectionSet}.
       * Call {ValidateNoNestedMocks(nextSelectionSet, isChildrenMocked)}.
 
+## No Conflicting Mocks
+
+If multiple equivalent selections ({Field Selection Merging}) exist for a field,
+either all must use `@mock` with identical arguments, or none may use `@mock`.
+This rule extends across fragment boundaries.
+
+```graphql counter-example
+fragment FooFields on Foo {
+  foo @mock(value: "foo!")
+}
+
+fragment MoreFooFields on Foo {
+  # ❌ Validation error: equivalent selection is mocked in FooFields but not here
+  foo
+}
+
+query GetFoo($id: ID!) {
+  foo(id: $id) {
+    ...FooFields
+    ...MoreFooFields
+  }
+}
+```
+
+**Formal Specification**
+
+ValidateNoConflictingMocks(operationDefinition) :
+  1. Collect all fields in the operation, expanding fragment spreads, grouped by
+     {response name}.
+  1. For each group of fields sharing a response name:
+      * If any field has a `@mock` directive, every field in the group must have
+        a `@mock` directive with identical arguments.
+      * Recursively apply to merged child selection sets.
+
 ## No Empty Operation Root Validation
 
 An operation's root {SelectionSet} must contain at least one selection
