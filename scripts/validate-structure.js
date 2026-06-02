@@ -117,6 +117,12 @@ function validateMetadata(dirPath, gapName) {
 function validateAllowedFiles(dirPath, gapName) {
   const entries = readdirSync(dirPath);
   for (const entry of entries) {
+    if (entry.startsWith(".")) {
+      error(
+        gapName,
+        `Dotfiles are not allowed: "${entry}". If you believe this is in error, please ping @graphql/gaps-editors.`,
+      );
+    }
     const fullPath = join(dirPath, entry);
     if (statSync(fullPath).isDirectory()) {
       error(
