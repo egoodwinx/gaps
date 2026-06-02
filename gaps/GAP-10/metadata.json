@@ -1,0 +1,13 @@
+{
+  "biblio": {
+    "https://spec.graphql.org/September2025/": {
+      "FragmentSpread": "#FragmentSpread",
+      "Selection": "#Selection",
+      "SelectionSet": "#SelectionSet",
+      "CompleteValue()": "#CompleteValue()",
+      "CoerceArgumentValues()": "#CoerceArgumentValues()",
+      "response name": "#response-name",
+      "Field Selection Merging": "#sec-Field-Selection-Merging"
+    }
+  }
+}
