@@ -127,8 +127,7 @@ function validateAllowedFiles(dirPath, gapName) {
     if (
       entry === "metadata.yml" ||
       entry === "metadata.json" ||
-      entry.endsWith(".md") ||
-      !entry.startsWith(".")
+      entry.endsWith(".md")
     ) {
       continue;
     }
