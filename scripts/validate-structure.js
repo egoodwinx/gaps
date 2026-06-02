@@ -117,6 +117,9 @@ function validateMetadata(dirPath, gapName) {
 function validateAllowedFiles(dirPath, gapName) {
   const entries = readdirSync(dirPath);
   for (const entry of entries) {
+    if (entry.startsWith(".")) {
+      continue;
+    }
     const fullPath = join(dirPath, entry);
     if (statSync(fullPath).isDirectory()) {
       error(
@@ -127,8 +130,7 @@ function validateAllowedFiles(dirPath, gapName) {
     if (
       entry === "metadata.yml" ||
       entry === "metadata.json" ||
-      entry.endsWith(".md") ||
-      entry.startsWith(".")
+      entry.endsWith(".md")
     ) {
       continue;
     }
