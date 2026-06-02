@@ -1,4 +1,4 @@
-id: 0
+id: 49
 title: "@semanticNonNull Directive"
 summary: >
   A schema directive that marks a field position as "semantically non null" —
@@ -11,4 +11,4 @@ authors:
     email: "martin@apollographql.com"
     githubUsername: "@martinbonnin"
 sponsor: "@martinbonnin"
-discussion: "https://github.com/graphql/gaps/pull/0"
+discussion: "https://github.com/graphql/gaps/pull/49"
