@@ -6,8 +6,8 @@
       "SelectionSet": "#SelectionSet",
       "CompleteValue()": "#CompleteValue()",
       "CoerceArgumentValues()": "#CoerceArgumentValues()",
-      "response name": "#response-name",
-      "Field Selection Merging": "#sec-Field-Selection-Merging"
+      "ResponseName": "#response-name",
+      "FieldSelectionMerging": "#sec-Field-Selection-Merging"
     }
   }
 }
