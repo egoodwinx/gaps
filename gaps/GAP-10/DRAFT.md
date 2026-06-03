@@ -345,7 +345,9 @@ list value directly:
 This is valid for both operation-level and field-level `@mock` directives.
 
 The client must append the contents of {"errors"} to the response's {"errors"}
-array.
+array. For each of these error objects, the client should populate the {"path"} field at
+runtime using the response path derived from {"__path__"}, ensuring that error
+paths correctly reflect the field's position in the response.
 
 #### extensions
 
