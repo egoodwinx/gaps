@@ -1,0 +1,21 @@
+<header class="site-header">
+  <div class="wrap">
+    <nav class="topline" aria-label="Site">
+      <a class="brand-link" href="https://graphql.org/" aria-label="GraphQL">
+        <img
+          src="{{assetPrefix}}assets/graphql-logo-wordmark.svg"
+          alt="GraphQL"
+        />
+      </a>
+    </nav>
+    <div class="{{mastheadClasses}}">
+      <p class="eyebrow">
+        {{#if eyebrowHref}}
+        <a href="{{eyebrowHref}}">{{eyebrow}}</a>{{eyebrowSuffix}} {{else}}
+        {{eyebrow}} {{/if}}
+      </p>
+      <h1>{{title}}</h1>
+      <p class="lede">{{lede}}</p>
+    </div>
+  </div>
+</header>

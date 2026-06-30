@@ -1,0 +1,12 @@
+<dl class="gap-meta">
+  {{#each items}}
+  <div>
+    <dt>{{label}}</dt>
+    <dd>
+      {{#if href}}
+      <a href="{{href}}">Open discussion</a>
+      {{else}} {{value}} {{/if}}
+    </dd>
+  </div>
+  {{/each}}
+</dl>

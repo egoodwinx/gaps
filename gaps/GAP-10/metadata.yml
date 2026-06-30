@@ -1,0 +1,16 @@
+id: 10
+title: "@mock Directive"
+summary: >
+  A client-side directive that allows GraphQL clients to return mocked data for
+  individual fields or entire operations, enabling frontend development against
+  schema that doesn't yet exist on the server.
+status: proposal
+authors:
+  - name: "Mark Larah"
+    email: "markl@yelp.com"
+    githubUsername: "@magicmark"
+  - name: "Michael Rebello"
+    email: "me@michaelrebello.com"
+    githubUsername: "@rebello95"
+sponsor: "@magicmark"
+discussion: "https://github.com/graphql/gaps/pull/10"

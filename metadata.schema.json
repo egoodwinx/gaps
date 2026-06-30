@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/graphql/gaps/main/metadata.schema.json",
+  "title": "GAP Metadata",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "status": { "type": "string", "enum": ["proposal", "draft", "accepted"] },
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "githubUsername": { "type": "string", "pattern": "^@" }
+        },
+        "required": ["name", "email", "githubUsername"],
+        "additionalProperties": false
+      }
+    },
+    "sponsor": { "type": "string", "pattern": "^@" },
+    "discussion": { "type": "string" },
+    "id": { "type": "integer" },
+    "related": { "type": "array", "items": { "type": "integer" } },
+    "replaces": { "type": "integer" },
+    "supersededBy": { "type": "integer" },
+    "tags": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": [
+    "id",
+    "title",
+    "summary",
+    "status",
+    "authors",
+    "sponsor",
+    "discussion"
+  ],
+  "additionalProperties": false
+}

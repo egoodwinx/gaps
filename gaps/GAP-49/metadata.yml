@@ -1,0 +1,14 @@
+id: 49
+title: "@semanticNonNull Directive"
+summary: >
+  A schema directive that marks a field position as "semantically non null" —
+  guaranteed to be non-null unless there is a matching error in the response
+  `errors` array — allowing tooling to generate non-null types for newer clients
+  without breaking older clients that cannot enable `onError: "NULL"`.
+status: proposal
+authors:
+  - name: "Martin Bonnin"
+    email: "martin@apollographql.com"
+    githubUsername: "@martinbonnin"
+sponsor: "@martinbonnin"
+discussion: "https://github.com/graphql/gaps/pull/49"
