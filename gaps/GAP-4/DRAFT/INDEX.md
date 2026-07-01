@@ -13,7 +13,7 @@ type Query {
 
 ```graphql example
 extend type Query {
-  extend id: ID @deprecated(reason: "Use globalId instead")
+  id: ID @deprecated(reason: "Use globalId instead")
 }
 ```
 
