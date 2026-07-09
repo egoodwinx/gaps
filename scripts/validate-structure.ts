@@ -3,10 +3,10 @@
 /**
  * Validates the structure of a GAP directory.
  *
- * Usage: ./scripts/validate-structure.js <gap-directory>
+ * Usage: ./scripts/validate-structure.ts <gap-directory>
  *
  * Can be xarg'd over all GAP directories:
- *   find ./gaps -maxdepth 1 -type d -name 'GAP-*' | xargs -I{} node scripts/validate-structure.js {}
+ *   find ./gaps -maxdepth 1 -type d -name 'GAP-*' | xargs -I{} node scripts/validate-structure.ts {}
  */
 
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
@@ -162,7 +162,7 @@ function main() {
   const { positionals } = parseArgs({ allowPositionals: true, strict: true });
 
   if (positionals.length !== 1) {
-    console.error("Usage: ./scripts/validate-structure.js <gap-directory>");
+    console.error("Usage: ./scripts/validate-structure.ts <gap-directory>");
     process.exit(1);
   }
 
