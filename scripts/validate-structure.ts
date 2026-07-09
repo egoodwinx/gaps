@@ -35,9 +35,10 @@ const metadataSchema = JSON.parse(await readFile(schemaPath, "utf8"));
 const ajv = new Ajv({ allErrors: true });
 const validateMetadataSchema = ajv.compile(metadataSchema);
 
+const errors: { [gapName: string]: string[] } = Object.create(null);
 function error(gapName: string, message: string) {
-  console.error(`${gapName}: ${message}`);
-  process.exit(1);
+  errors[gapName] ??= [];
+  errors[gapName].push(message);
 }
 
 function validateDirectoryNaming(dirPath: string) {
@@ -212,6 +213,20 @@ async function main() {
 
   // Validate metadata.yml
   await validateMetadata(dirPath, gapName);
+
+  const badGaps = Object.keys(errors);
+  if (badGaps.length > 0) {
+    process.exitCode = 1;
+    badGaps.sort(); // This is lexicographic... Not ideal but I'm too lazy to parse it.
+    for (const gapName of badGaps) {
+      console.error(`# ${gapName}`);
+      console.error();
+      for (const message of errors[gapName]) {
+        console.error(`- ${message}`);
+      }
+      console.error();
+    }
+  }
 }
 
 await main();
