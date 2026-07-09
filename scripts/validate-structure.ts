@@ -13,7 +13,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import Ajv from "ajv/dist/2020.js";
+import { Ajv2020 as Ajv } from "ajv/dist/2020.js";
 import { parse as parseYaml } from "yaml";
 import validator from "validator";
 
@@ -27,12 +27,12 @@ const metadataSchema = JSON.parse(readFileSync(schemaPath, "utf8"));
 const ajv = new Ajv({ allErrors: true });
 const validateMetadataSchema = ajv.compile(metadataSchema);
 
-function error(gapName, message) {
+function error(gapName: string, message: string) {
   console.error(`${gapName}: ${message}`);
   process.exit(1);
 }
 
-function validateDirectoryNaming(dirPath) {
+function validateDirectoryNaming(dirPath: string) {
   const dirName = basename(dirPath);
 
   // Special case: GAP-0 is allowed
@@ -51,14 +51,14 @@ function validateDirectoryNaming(dirPath) {
   return dirName;
 }
 
-function validateReadmeExists(dirPath, gapName) {
+function validateReadmeExists(dirPath: string, gapName: string) {
   const readmePath = join(dirPath, "README.md");
   if (!existsSync(readmePath)) {
     error(gapName, "No README.md file found");
   }
 }
 
-function validateMetadata(dirPath, gapName) {
+function validateMetadata(dirPath: string, gapName: string) {
   const metadataPath = join(dirPath, "metadata.yml");
 
   if (!existsSync(metadataPath)) {
@@ -69,30 +69,34 @@ function validateMetadata(dirPath, gapName) {
   try {
     content = readFileSync(metadataPath, "utf8");
   } catch (err) {
-    error(gapName, `Failed to read metadata.yml: ${err.message}`);
+    error(gapName, `Failed to read metadata.yml: ${String(err)}`);
+    return;
   }
 
   let metadata;
   try {
     metadata = parseYaml(content);
   } catch (err) {
-    error(gapName, `Invalid YAML in metadata.yml: ${err.message}`);
+    error(gapName, `Invalid YAML in metadata.yml: ${String(err)}`);
+    return;
   }
 
   if (typeof metadata !== "object") {
     error(gapName, "metadata.yml must contain a valid YAML object");
+    return;
   }
 
   // Validate against JSON Schema
   const valid = validateMetadataSchema(metadata);
   if (!valid) {
-    const errors = validateMetadataSchema.errors
-      .map((err) => {
+    const errors = validateMetadataSchema
+      .errors!.map((err) => {
         const prefix = err.instancePath ? `${err.instancePath}: ` : "";
         return `${prefix}${err.message}`;
       })
       .join("\n");
     error(gapName, `metadata.yml validation failed:\n\n${errors}`);
+    return;
   }
 
   // Validate authors have valid email
@@ -114,7 +118,7 @@ function validateMetadata(dirPath, gapName) {
   }
 }
 
-function validateAllowedFiles(dirPath, gapName) {
+function validateAllowedFiles(dirPath: string, gapName: string) {
   for (const entry of readdirSync(dirPath)) {
     if (entry.startsWith(".")) {
       error(gapName, `Dotfiles are not allowed: "${entry}".`);
@@ -132,7 +136,11 @@ function validateAllowedFiles(dirPath, gapName) {
       continue;
     }
 
-    if (entry === "metadata.yml" || entry === "metadata.json" || entry.endsWith(".md")) {
+    if (
+      entry === "metadata.yml" ||
+      entry === "metadata.json" ||
+      entry.endsWith(".md")
+    ) {
       continue;
     }
 
@@ -140,7 +148,7 @@ function validateAllowedFiles(dirPath, gapName) {
   }
 }
 
-function validateVersionsDir(dirPath, gapName) {
+function validateVersionsDir(dirPath: string, gapName: string) {
   for (const entry of readdirSync(dirPath)) {
     if (entry.startsWith(".")) {
       error(gapName, `Dotfiles are not allowed in versions/: "${entry}".`);
@@ -153,7 +161,10 @@ function validateVersionsDir(dirPath, gapName) {
     }
 
     if (!/^\d{4}-\d{2}\.(md|yml)$/.test(entry)) {
-      error(gapName, `Unexpected file in versions/: "${entry}". Only YYYY-MM.md and YYYY-MM.yml are allowed.`);
+      error(
+        gapName,
+        `Unexpected file in versions/: "${entry}". Only YYYY-MM.md and YYYY-MM.yml are allowed.`,
+      );
     }
   }
 }
