@@ -10,8 +10,7 @@
  */
 
 import { access, constants, readFile, readdir, stat } from "node:fs/promises";
-import { basename, join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { basename, join } from "node:path";
 import { parseArgs } from "node:util";
 import { Ajv2020 as Ajv } from "ajv/dist/2020.js";
 import { parse as parseYaml } from "yaml";
@@ -26,7 +25,7 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 
 // Load JSON Schema from root directory
 const schemaPath = join(__dirname, "..", "metadata.schema.json");
