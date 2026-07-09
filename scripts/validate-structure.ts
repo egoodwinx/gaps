@@ -3,10 +3,10 @@
 /**
  * Validates the structure of a GAP directory.
  *
- * Usage: ./scripts/validate-structure.ts <gap-directory>
+ * Usage: ./scripts/validate-structure.ts [gap-directory]
  *
- * Can be xarg'd over all GAP directories:
- *   find ./gaps -maxdepth 1 -type d -name 'GAP-*' | xargs -I{} node scripts/validate-structure.ts {}
+ * If no GAP directory is specified, will scan all:
+ *   node scripts/validate-structure.ts
  */
 
 import { access, constants, readFile, readdir, stat } from "node:fs/promises";
