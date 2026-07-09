@@ -128,10 +128,11 @@ async function validateMetadata(dirPath: string, gapName: string) {
 }
 
 async function validateAllowedFiles(dirPath: string, gapName: string) {
-  for (const entry of await readdir(dirPath)) {
+  const entries = await readdir(dirPath);
+  const promises = entries.map(async (entry) => {
     if (entry.startsWith(".")) {
       error(gapName, `Dotfiles are not allowed: "${entry}".`);
-      continue;
+      return;
     }
 
     const fullPath = join(dirPath, entry);
@@ -142,7 +143,7 @@ async function validateAllowedFiles(dirPath: string, gapName: string) {
       } else {
         error(gapName, `Unexpected directory "${entry}".`);
       }
-      continue;
+      return;
     }
 
     if (
@@ -150,23 +151,25 @@ async function validateAllowedFiles(dirPath: string, gapName: string) {
       entry === "metadata.json" ||
       entry.endsWith(".md")
     ) {
-      continue;
+      return;
     }
 
     error(gapName, `Unexpected file "${entry}".`);
-  }
+  });
+  await Promise.all(promises);
 }
 
 async function validateVersionsDir(dirPath: string, gapName: string) {
-  for (const entry of await readdir(dirPath)) {
+  const entries = await readdir(dirPath);
+  const promises = entries.map(async (entry) => {
     if (entry.startsWith(".")) {
       error(gapName, `Dotfiles are not allowed in versions/: "${entry}".`);
-      continue;
+      return;
     }
 
     if ((await stat(join(dirPath, entry))).isDirectory()) {
       error(gapName, `Unexpected directory in versions/: "${entry}".`);
-      continue;
+      return;
     }
 
     if (!/^\d{4}-\d{2}\.(md|yml)$/.test(entry)) {
@@ -175,7 +178,8 @@ async function validateVersionsDir(dirPath: string, gapName: string) {
         `Unexpected file in versions/: "${entry}". Only YYYY-MM.md and YYYY-MM.yml are allowed.`,
       );
     }
-  }
+  });
+  await Promise.all(promises);
 }
 
 async function main() {
