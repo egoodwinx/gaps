@@ -9,7 +9,7 @@
  *   find ./gaps -maxdepth 1 -type d -name 'GAP-*' | xargs -I{} node scripts/validate-structure.ts {}
  */
 
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { access, constants, readFile, readdir, stat } from "node:fs/promises";
 import { basename, join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -17,11 +17,20 @@ import { Ajv2020 as Ajv } from "ajv/dist/2020.js";
 import { parse as parseYaml } from "yaml";
 import validator from "validator";
 
+async function exists(path: string): Promise<boolean> {
+  try {
+    await access(path, constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Load JSON Schema from root directory
 const schemaPath = join(__dirname, "..", "metadata.schema.json");
-const metadataSchema = JSON.parse(readFileSync(schemaPath, "utf8"));
+const metadataSchema = JSON.parse(await readFile(schemaPath, "utf8"));
 
 // Set up ajv with JSON Schema
 const ajv = new Ajv({ allErrors: true });
@@ -51,23 +60,23 @@ function validateDirectoryNaming(dirPath: string) {
   return dirName;
 }
 
-function validateReadmeExists(dirPath: string, gapName: string) {
+async function validateReadmeExists(dirPath: string, gapName: string) {
   const readmePath = join(dirPath, "README.md");
-  if (!existsSync(readmePath)) {
+  if (!(await exists(readmePath))) {
     error(gapName, "No README.md file found");
   }
 }
 
-function validateMetadata(dirPath: string, gapName: string) {
+async function validateMetadata(dirPath: string, gapName: string) {
   const metadataPath = join(dirPath, "metadata.yml");
 
-  if (!existsSync(metadataPath)) {
+  if (!(await exists(metadataPath))) {
     error(gapName, "No metadata.yml file found");
   }
 
   let content;
   try {
-    content = readFileSync(metadataPath, "utf8");
+    content = await readFile(metadataPath, "utf8");
   } catch (err) {
     error(gapName, `Failed to read metadata.yml: ${String(err)}`);
     return;
@@ -118,8 +127,8 @@ function validateMetadata(dirPath: string, gapName: string) {
   }
 }
 
-function validateAllowedFiles(dirPath: string, gapName: string) {
-  for (const entry of readdirSync(dirPath)) {
+async function validateAllowedFiles(dirPath: string, gapName: string) {
+  for (const entry of await readdir(dirPath)) {
     if (entry.startsWith(".")) {
       error(gapName, `Dotfiles are not allowed: "${entry}".`);
       continue;
@@ -127,9 +136,9 @@ function validateAllowedFiles(dirPath: string, gapName: string) {
 
     const fullPath = join(dirPath, entry);
 
-    if (statSync(fullPath).isDirectory()) {
+    if ((await stat(fullPath)).isDirectory()) {
       if (entry === "versions") {
-        validateVersionsDir(fullPath, gapName);
+        await validateVersionsDir(fullPath, gapName);
       } else {
         error(gapName, `Unexpected directory "${entry}".`);
       }
@@ -148,14 +157,14 @@ function validateAllowedFiles(dirPath: string, gapName: string) {
   }
 }
 
-function validateVersionsDir(dirPath: string, gapName: string) {
-  for (const entry of readdirSync(dirPath)) {
+async function validateVersionsDir(dirPath: string, gapName: string) {
+  for (const entry of await readdir(dirPath)) {
     if (entry.startsWith(".")) {
       error(gapName, `Dotfiles are not allowed in versions/: "${entry}".`);
       continue;
     }
 
-    if (statSync(join(dirPath, entry)).isDirectory()) {
+    if ((await stat(join(dirPath, entry))).isDirectory()) {
       error(gapName, `Unexpected directory in versions/: "${entry}".`);
       continue;
     }
@@ -169,7 +178,7 @@ function validateVersionsDir(dirPath: string, gapName: string) {
   }
 }
 
-function main() {
+async function main() {
   const { positionals } = parseArgs({ allowPositionals: true, strict: true });
 
   if (positionals.length !== 1) {
@@ -179,12 +188,12 @@ function main() {
 
   const dirPath = positionals[0];
 
-  if (!existsSync(dirPath)) {
+  if (!(await exists(dirPath))) {
     console.error(`Directory does not exist: ${dirPath}`);
     process.exit(1);
   }
 
-  if (!statSync(dirPath).isDirectory()) {
+  if (!(await stat(dirPath)).isDirectory()) {
     console.error(`Not a directory: ${dirPath}`);
     process.exit(1);
   }
@@ -193,13 +202,13 @@ function main() {
   const gapName = validateDirectoryNaming(dirPath);
 
   // Validate only allowed files are present
-  validateAllowedFiles(dirPath, gapName);
+  await validateAllowedFiles(dirPath, gapName);
 
   // Validate README.md exists
-  validateReadmeExists(dirPath, gapName);
+  await validateReadmeExists(dirPath, gapName);
 
   // Validate metadata.yml
-  validateMetadata(dirPath, gapName);
+  await validateMetadata(dirPath, gapName);
 }
 
-main();
+await main();
