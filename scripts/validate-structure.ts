@@ -10,7 +10,7 @@
  */
 
 import { access, constants, readFile, readdir, stat } from "node:fs/promises";
-import { basename, join } from "node:path";
+import { basename, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { Ajv2020 as Ajv } from "ajv/dist/2020.js";
 import { parse as parseYaml } from "yaml";
@@ -25,10 +25,11 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
-const __dirname = import.meta.dirname;
+const ROOT = resolve(import.meta.dirname, "..");
+const GAPS_DIR = join(ROOT, "gaps");
 
 // Load JSON Schema from root directory
-const schemaPath = join(__dirname, "..", "metadata.schema.json");
+const schemaPath = join(ROOT, "metadata.schema.json");
 const metadataSchema = JSON.parse(await readFile(schemaPath, "utf8"));
 
 // Set up ajv with JSON Schema
@@ -41,7 +42,7 @@ function error(gapName: string, message: string) {
   errors[gapName].push(message);
 }
 
-function validateDirectoryNaming(dirPath: string) {
+function validateDirectoryNaming(dirPath: string): string | null {
   const dirName = basename(dirPath);
 
   // Special case: GAP-0 is allowed
@@ -55,6 +56,7 @@ function validateDirectoryNaming(dirPath: string) {
       dirName,
       `Invalid directory name format. Expected GAP-N (e.g. GAP-10, GAP-123)`,
     );
+    return null;
   }
 
   return dirName;
@@ -72,6 +74,7 @@ async function validateMetadata(dirPath: string, gapName: string) {
 
   if (!(await exists(metadataPath))) {
     error(gapName, "No metadata.yml file found");
+    return;
   }
 
   let content;
@@ -143,18 +146,15 @@ async function validateAllowedFiles(dirPath: string, gapName: string) {
       } else {
         error(gapName, `Unexpected directory "${entry}".`);
       }
-      return;
-    }
-
-    if (
+    } else if (
       entry === "metadata.yml" ||
       entry === "metadata.json" ||
       entry.endsWith(".md")
     ) {
-      return;
+      // Allowed
+    } else {
+      error(gapName, `Unexpected file "${entry}".`);
     }
-
-    error(gapName, `Unexpected file "${entry}".`);
   });
   await Promise.all(promises);
 }
@@ -164,19 +164,15 @@ async function validateVersionsDir(dirPath: string, gapName: string) {
   const promises = entries.map(async (entry) => {
     if (entry.startsWith(".")) {
       error(gapName, `Dotfiles are not allowed in versions/: "${entry}".`);
-      return;
-    }
-
-    if ((await stat(join(dirPath, entry))).isDirectory()) {
+    } else if ((await stat(join(dirPath, entry))).isDirectory()) {
       error(gapName, `Unexpected directory in versions/: "${entry}".`);
-      return;
-    }
-
-    if (!/^\d{4}-\d{2}\.(md|yml)$/.test(entry)) {
+    } else if (!/^\d{4}-\d{2}\.(md|yml)$/.test(entry)) {
       error(
         gapName,
         `Unexpected file in versions/: "${entry}". Only YYYY-MM.md and YYYY-MM.yml are allowed.`,
       );
+    } else {
+      // Passes all the checks
     }
   });
   await Promise.all(promises);
@@ -185,38 +181,61 @@ async function validateVersionsDir(dirPath: string, gapName: string) {
 async function main() {
   const { positionals } = parseArgs({ allowPositionals: true, strict: true });
 
-  if (positionals.length !== 1) {
+  const gapsToCheck: string[] = [];
+
+  if (positionals.length > 1) {
     console.error("Usage: ./scripts/validate-structure.ts <gap-directory>");
     process.exit(1);
+  } else if (positionals.length === 1) {
+    gapsToCheck.push(positionals[0]);
+  } else {
+    const gaps = await readdir(GAPS_DIR);
+    await Promise.all(
+      gaps.map(async (filename) => {
+        if (filename.startsWith(".")) return;
+        const fullPath = join(GAPS_DIR, filename);
+        const stats = await stat(fullPath);
+        if (stats.isDirectory()) {
+          gapsToCheck.push(fullPath);
+        }
+      }),
+    );
   }
 
-  const dirPath = positionals[0];
+  await Promise.all(
+    gapsToCheck.map(async (dirPath) => {
+      // Validate directory naming
+      const gapName = validateDirectoryNaming(dirPath);
+      if (gapName == null) return;
 
-  if (!(await exists(dirPath))) {
-    console.error(`Directory does not exist: ${dirPath}`);
-    process.exit(1);
-  }
+      let stats;
+      try {
+        stats = await stat(dirPath);
+      } catch (e) {
+        error(gapName, `Directory ${dirPath} does not exist? ${e}`);
+        return;
+      }
 
-  if (!(await stat(dirPath)).isDirectory()) {
-    console.error(`Not a directory: ${dirPath}`);
-    process.exit(1);
-  }
+      if (!stats.isDirectory()) {
+        error(gapName, `Not a directory: ${dirPath}`);
+      } else {
+        await Promise.all([
+          // Validate only allowed files are present
+          validateAllowedFiles(dirPath, gapName),
 
-  // Validate directory naming
-  const gapName = validateDirectoryNaming(dirPath);
+          // Validate README.md exists
+          validateReadmeExists(dirPath, gapName),
 
-  // Validate only allowed files are present
-  await validateAllowedFiles(dirPath, gapName);
-
-  // Validate README.md exists
-  await validateReadmeExists(dirPath, gapName);
-
-  // Validate metadata.yml
-  await validateMetadata(dirPath, gapName);
+          // Validate metadata.yml
+          validateMetadata(dirPath, gapName),
+        ]);
+      }
+    }),
+  );
 
   const badGaps = Object.keys(errors);
   if (badGaps.length > 0) {
-    process.exitCode = 1;
+    process.exitCode = 2;
     badGaps.sort(); // This is lexicographic... Not ideal but I'm too lazy to parse it.
     for (const gapName of badGaps) {
       console.error(`# ${gapName}`);
