@@ -25,11 +25,11 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
-const ROOT = resolve(import.meta.dirname, "..");
-const GAPS_DIR = join(ROOT, "gaps");
+const rootDir = resolve(import.meta.dirname, "..");
+const gapsDir = join(rootDir, "gaps");
 
 // Load JSON Schema from root directory
-const schemaPath = join(ROOT, "metadata.schema.json");
+const schemaPath = join(rootDir, "metadata.schema.json");
 const metadataSchema = JSON.parse(await readFile(schemaPath, "utf8"));
 
 // Set up ajv with JSON Schema
@@ -189,11 +189,11 @@ async function main() {
   } else if (positionals.length === 1) {
     gapsToCheck.push(positionals[0]);
   } else {
-    const gaps = await readdir(GAPS_DIR);
+    const gaps = await readdir(gapsDir);
     await Promise.all(
       gaps.map(async (filename) => {
         if (filename.startsWith(".")) return;
-        const fullPath = join(GAPS_DIR, filename);
+        const fullPath = join(gapsDir, filename);
         const stats = await stat(fullPath);
         if (stats.isDirectory()) {
           gapsToCheck.push(fullPath);
