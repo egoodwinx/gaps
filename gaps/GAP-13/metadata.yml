@@ -6,6 +6,8 @@ summary: >
   GraphQL executable document.
 status: proposal
 authors:
-  - "Benjie Gillam <code@benjiegillam.com>"
+  - name: "Benjie Gillam"
+    email: "code@benjiegillam.com"
+    githubUsername: "@benjie"
 sponsor: "@benjie"
 discussion: "https://github.com/graphql/gaps/pull/13"
