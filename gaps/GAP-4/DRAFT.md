@@ -1,3 +1,5 @@
+# Field extensions
+
 ## Problem statement
 
 The current GraphQL specification allows type system extensions.
@@ -41,6 +43,8 @@ extend type User {
   email: String @semanticNonNull @deprecated("Use primaryEmail instead") 
 }
 ```
+
+This proposal makes it possible to add new directives to an existing field.
 
 ## Overview
 

@@ -2,7 +2,11 @@ id: 4
 title: Field Extensions
 status: proposal
 authors:
-  - "Emily Goodwin <goodwin.y.emily@gmail.com>"
-  - "Martin Bonnin <martin@mbonnin.net>"
+  - name: "Emily Goodwin"
+    email: "goodwin.y.emily@gmail.com"
+    githubUsername: "@egoodwinx"
+  - name: "Martin Bonnin"
+    email: "martin@mbonnin.net"
+    githubUsername: "@martinbonnin"
 sponsor: "@martinbonnin"
 discussion: "https://github.com/graphql/graphql-spec/issues/1162"
